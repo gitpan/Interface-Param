@@ -1,10 +1,11 @@
-Interface::Param version 0.1
+Interface::Param version 0.2
 =================
 
 This abstract class allows you to quickly and easily add a method to your 
 objects which stores key/value pairs and allows you to retrieve them.  The 
-functionality is not unlike the param() method from CGI.pm (which you’re 
-probably familiar with).
+functionality is not unlike the param() method from CGI.pm (which you're 
+probably familiar with).  The default distribution includes a subclass
+Interface::Param::Hash which I think most module authors will find useful.
 
 
 INSTALLATION

@@ -1,5 +1,9 @@
 Revision history for Perl module Interface::Param.
 
+0.2 Monday, August the 2nd of 2004
+    Changed design to a more appropriate virtual-class model that can be
+    subclassed to provide the underlying storage mechanism
+
 0.1 Saturday, July the 31st of 2004
     Initial release
 

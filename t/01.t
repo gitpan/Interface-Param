@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 86;
+use Test::More tests => 52;
 
 #########################
 
@@ -21,7 +21,7 @@ ok( defined($tobj) );
 isa_ok( $tobj, 'Interface::Param' );
 
 # check documented methods exist
-can_ok( $tobj, '_param', '_delete_param', '_clear_param' );
+can_ok( $tobj, 'param', 'param_get', 'param_set', 'param_del' );
 
 # check empty args (no data yet)
 is( $tobj->param(), 0 );
@@ -34,31 +34,28 @@ $tobj->param("" => 'foo' );
 is( $tobj->param(""), 'foo' );
 
 
-# check setting/poking/retrieving data (poking = get data directly)
+# check param_get and param_set 
 {
     my @test_data = (
         0, 1, -1, "", "bar", [1,2,3], {'1'=>1,'a'=>'a'},
         [{'a'=>'b','c'=>'d'},{'e'=>'f','g'=>'h'}]
     );
 
-    # single element tests all-styles (including complex refs ) 
+    # single element tests
     foreach my $i ( 0 .. $#test_data )
     {
         my $d = $test_data[$i];
         my $cb;
 
         $tobj->param( ('foo' => $d) ); # hash/list style
-        is_deeply( $tobj->{'__params'}->{'foo'}, $d );
         is_deeply( $tobj->param('foo'), $d );
 
         $tobj->param( {'foo' => $d} ); # hashref style
-        is_deeply( $tobj->{'__params'}->{'foo'}, $d );
         is_deeply( $tobj->param('foo'), $d );
 
         next if $i > 4;
 
         $tobj->param( [ $d ] ); # arrayref style
-        is_deeply( $tobj->{'__params'}->{$d}, $d );
         is_deeply( $tobj->param($d), $d );
     }
 
@@ -73,7 +70,6 @@ is( $tobj->param(""), 'foo' );
     # check results
     foreach my $key ( keys %hash )
     {
-        is_deeply( $tobj->{'__params'}->{$key}, $hash{$key} );
         is_deeply( $tobj->param($key), $hash{$key} );
     }
 
@@ -81,34 +77,42 @@ is( $tobj->param(""), 'foo' );
 
     foreach my $key ( keys %hash )
     {
-        is_deeply( $tobj->{'__params'}->{$key}, $hash{$key} );
         is_deeply( $tobj->param($key), $hash{$key} );
     }
 }
 
-
-# check clear all params
-
-$tobj->param( 'foo' => 'bar' );
-$tobj->_clear_param( '__params' );
-
+# check param_del deletes all data
+$tobj->param( 'b' => 2, 'c' => 3 );
+$tobj->param_del();
 is( $tobj->param(), 0 );
-is( $tobj->param('foo'), undef );
 
-
-# check clear individual params
+# check other get/set/deletes with this data
 $tobj->param( 'a' => 1, 'b' => 2, 'c' => 3 );
-is( $tobj->param(), 3 );
-$tobj->_delete_param( '__params', 'a' );
-is( $tobj->param(), 2 );
-is( $tobj->param('a'), undef );
-is( $tobj->param('b'), 2 );
 
+# check param_get returns multiple values in the right order
+my @vals = $tobj->param_get( '__params', 'b', 'a', 'b', 'foo' );
+is_deeply( \@vals, [2,1,2] );
+
+# check param_get returns all keys when called with no arguments
+is( $tobj->param(), 3 );
+
+# check param_del deletes single elements
+$tobj->param_del( 'c' );
+is( $tobj->param(), 2 );
+is( $tobj->param( 'c' ), undef );
+$tobj->param( 'c' => 3 );
+
+# check param_del deletes multiple elements
+$tobj->param_del( 'c', 'b' );
+is( $tobj->param(), 1 );
+is( $tobj->param_get( '__params', 'b', 'c' ), 0 );
+is( $tobj->param( 'b' ), undef );
+is( $tobj->param( 'c' ), undef );
 
 
 
 package Tester;
-use base qw(Interface::Param);
+use base qw(Interface::Param::Hash);
 use strict;
 use warnings;
 
@@ -119,10 +123,9 @@ sub new
     return bless( {}, $class );
 }
 
-sub param
-{
-    my $self = shift;
-    $self->_param( '__params', @_ );
-}
+# just wrap these calls to make it easier above
+sub param     { (shift)->SUPER::param    ( '__params', @_ ) }
+sub param_del { (shift)->SUPER::param_del( '__params', @_ ) }
 
 1;
+
