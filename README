@@ -1,0 +1,33 @@
+Interface::Param version 0.1
+=================
+
+This abstract class allows you to quickly and easily add a method to your 
+objects which stores key/value pairs and allows you to retrieve them.  The 
+functionality is not unlike the param() method from CGI.pm (which you’re 
+probably familiar with).
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install (as root)
+
+
+DEPENDENCIES
+
+    none
+
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2004 by Shaun Guth <l8nite@l8nite.net>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.4 or,
+at your option, any later version of Perl 5 you may have available.
+
+
